@@ -49,7 +49,9 @@ const appcenterRequest = async (path, key, attempt=0) => {
         return json;
     } catch (error) {
         if(attempt < 3){
-            return await appcenterRequest(path, key, attempt + 1)
+            setTimeout(function(){ 
+                return await appcenterRequest(path, key, attempt + 1)
+            }, 3000); 
         }
         else{
             console.log(`Skipping ${url}${path} after 3 attempts...`)
