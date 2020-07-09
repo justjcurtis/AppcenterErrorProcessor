@@ -3,7 +3,7 @@ const {writeFile, readFileAsync} = require('./shared')
 const { errorGroup, errorInstance } = require('./appcenterAPI')
 
 const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-
+let downloadIndex = 0;
 const aepGet = async (egID, args) =>{
     let errorGroupResponse;
     if(args.input == undefined){
@@ -24,10 +24,10 @@ const aepGet = async (egID, args) =>{
     console.log('Chunking workload...')
     const chunking = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
     chunking.start(errorGroupResponse.length, 0);
-    let chunks = [[]]
+    let chunks = []
     let chunksize = 10;
     for(let i = 0; i < errorGroupResponse.length; i++){
-        if(i%chunksize == 0){
+        if(i == 0 || i%chunksize == 0){
             chunks.push([])
         }
         chunks[chunks.length-1].push(errorGroupResponse[i]);
@@ -63,6 +63,7 @@ const aepGet = async (egID, args) =>{
 }
 
 const processChunk = async (chunk, egID, args) =>{
+    downloadIndex = 0;
     console.log('Enumerating individual error responses...')
     const enumerate = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
     enumerate.start(chunk.length, 0);
@@ -107,7 +108,8 @@ const getErrorResponse = async (groupID, errorID, key, owner, app) => {
     if(errorResponse == undefined){
         return undefined;
     }
-    progress.update(i+1);
+    progress.update(downloadIndex+1);
+    downloadIndex ++;
     return {
         'errorId':errorResponse.errorId,
         'reasonFrames':errorResponse.reasonFrames,
