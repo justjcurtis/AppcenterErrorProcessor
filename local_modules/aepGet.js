@@ -33,11 +33,13 @@ const aepGet = async (egID, args) =>{
     for(let i = 0; i < errorGroupResponse.length; i++){
         let errorID = errorGroupResponse[i].errorId;
         for(let j = 0; j < downloadResults.length; j++){
-            if(downloadResults[j].errorId == errorID){
-                errorGroupResponse[i].reasonFrames = downloadResults[j].reasonFrames
-                errorGroupResponse[i].carrierName = downloadResults[j].carrierName
-                errorGroupResponse[i].jailbreak = downloadResults[j].jailbreak
-                errorGroupResponse[i].properties = downloadResults[j].properties
+            if(downloadResults[j]!= undefined){
+                if(downloadResults[j].errorId == errorID){
+                    errorGroupResponse[i].reasonFrames = downloadResults[j].reasonFrames
+                    errorGroupResponse[i].carrierName = downloadResults[j].carrierName
+                    errorGroupResponse[i].jailbreak = downloadResults[j].jailbreak
+                    errorGroupResponse[i].properties = downloadResults[j].properties
+                }
             }
         }
         inject.update[i+1]
@@ -53,7 +55,7 @@ const aepGet = async (egID, args) =>{
 const getErrorResponse = async (groupID, errorID, key, owner, app) => {
     let errorResponse = await errorInstance(groupID, errorID, key, owner, app);
     if(errorResponse == undefined){
-        continue;
+        return undefined;
     }
     progress.update(i+1);
     return {
