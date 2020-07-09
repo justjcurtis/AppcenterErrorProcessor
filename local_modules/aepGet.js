@@ -1,0 +1,47 @@
+const cliProgress = require('cli-progress');
+const {writeFile} = require('./shared')
+const { errorGroup, errorInstance } = require('./appcenterAPI')
+
+const aepGet = async (egID, args) =>{
+    console.log(`Getting error group ${egID}...`)
+    let errorGroupResponse = await errorGroup(egID, args.key, args.from, args.to, args.owner, args.app);
+    writeFile(JSON.stringify(errorGroupResponse), args.output+'.bak')
+    if(errorGroupResponse == undefined){
+        console.log('error getting error groups')
+        return;
+    }
+    console.log('Finished.')
+
+    console.log('enumerating individual error responses')
+    let downloadTasks = []
+    for(let i = 0; i < errorGroupResponse.length; i++){
+        downloadTasks.push(getErrorResponse(egID, errorGroupResponse[i], args.key, args.owner, args.app))
+    }
+
+    const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+    progress.start(errorGroupResponse.length, 0);
+    progress.update(i+1);
+    progress.stop();
+    console.log('Finished.')
+
+    console.log(`Writing output to ${args.output}`)
+    writeFile(JSON.stringify(errorGroupResponse), args.output)
+    console.log('Finished.')
+}
+
+const getErrorResponse = async (groupID, errorID, key, owner, app) => {
+    let errorResponse = await errorInstance(groupID, errorID, key, owner, app);
+    if(errorResponse == undefined){
+        continue;
+    }
+    return {
+        'reasonFrames':errorResponse.reasonFrames,
+        'carrierName':errorResponse.carrierName,
+        'jailbreak':errorResponse.jailbreak,
+        'properties':errorResponse.properties
+    } 
+}
+
+module.exports = {
+    aepGet
+}

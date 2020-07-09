@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "description": "A CLI utility for processing and filtering appcenter error groups and instances",
   "main": "index.js",
+  "bin": "./commands.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -15,9 +16,7 @@
     "CLI",
     "Error",
     "Processing",
-    "Error",
     "Filtering",
-    "Error",
     "Aggregation"
   ],
   "author": "justjcurtis",
@@ -25,5 +24,13 @@
   "bugs": {
     "url": "https://github.com/justjcurtis/AppcenterErrorProcessor/issues"
   },
-  "homepage": "https://github.com/justjcurtis/AppcenterErrorProcessor#readme"
+  "homepage": "https://github.com/justjcurtis/AppcenterErrorProcessor#readme",
+  "dependencies": {
+    "cli-progress": "^3.8.2",
+    "commander": "^5.1.0",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "jest": "^26.0.1"
+  }
 }
