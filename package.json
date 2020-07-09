@@ -1,0 +1,29 @@
+{
+  "name": "appcentererrorprocessor",
+  "version": "0.0.1",
+  "description": "A CLI utility for processing and filtering appcenter error groups and instances",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justjcurtis/AppcenterErrorProcessor.git"
+  },
+  "keywords": [
+    "Appcenter",
+    "CLI",
+    "Error",
+    "Processing",
+    "Error",
+    "Filtering",
+    "Error",
+    "Aggregation"
+  ],
+  "author": "justjcurtis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/justjcurtis/AppcenterErrorProcessor/issues"
+  },
+  "homepage": "https://github.com/justjcurtis/AppcenterErrorProcessor#readme"
+}
