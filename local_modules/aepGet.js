@@ -1,24 +1,35 @@
 const cliProgress = require('cli-progress');
-const {writeFile} = require('./shared')
+const {writeFile, readFileAsync, readFile} = require('./shared')
 const { errorGroup, errorInstance } = require('./appcenterAPI')
 
 const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 const aepGet = async (egID, args) =>{
-    console.log(`Getting error group ${egID}...`)
-    let errorGroupResponse = await errorGroup(egID, args.key, args.from, args.to, args.owner, args.app);
-    writeFile(JSON.stringify(errorGroupResponse), args.output+'.bak')
-    if(errorGroupResponse == undefined){
-        console.log('error getting error groups')
-        return;
+    let errorGroupResponse;
+    if(args.input == undefined){
+        console.log(`Getting error group ${egID}...`)
+        errorGroupResponse = await errorGroup(egID, args.key, args.from, args.to, args.owner, args.app);
+        writeFile(JSON.stringify(errorGroupResponse), args.output+'.bak')
+        if(errorGroupResponse == undefined){
+            console.log('error getting error groups')
+            return;
+        }
+    }else{
+        console.log(`Reading error group backup ${args.input}...`)
+        errorGroupResponse = JSON.parse(await readFileAsync(args.input))
     }
     console.log('Finished.')
 
     console.log('Enumerating individual error responses')
+    const enumerate = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+    enumerate.start(errorGroupResponse.length, 0);
+
     let downloadTasks = []
     for(let i = 0; i < errorGroupResponse.length; i++){
         downloadTasks.push(getErrorResponse(egID, errorGroupResponse[i], args.key, args.owner, args.app))
+        enumerate.update(i+1)
     }
+    enumerate.stop()
     console.log('Finished.')
 
     console.log('Downloading individual error responses')

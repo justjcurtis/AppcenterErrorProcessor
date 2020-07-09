@@ -35,6 +35,7 @@ cli
     .requiredOption('-o, --owner <owner>', 'sets owner')
     .requiredOption('-a, --app <app>', 'sets app name')
     .requiredOption('-of, --output <output>', 'sets output file location')
+    .option('-if, --input <input>', 'use this with error group backups incase of failure while downloading individual error responses')
     .option('-f, --from <from>', 'sets from date "yyyy/mm/dd" - defaults to 90 days ago')
     .option('-t, --to <to>', 'sets to date "yyyy/mm/dd" - defaults to today')
     .action(function (ErrorGroupID, args) {
