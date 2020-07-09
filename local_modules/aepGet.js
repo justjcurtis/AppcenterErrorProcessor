@@ -1,9 +1,7 @@
 const cliProgress = require('cli-progress');
-const {writeFile, readFileAsync} = require('./shared')
+const {writeFile, readFileAsync, readFile} = require('./shared')
 const { errorGroup, errorInstance } = require('./appcenterAPI')
 
-const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-let downloadIndex = 0;
 const aepGet = async (egID, args) =>{
     let errorGroupResponse;
     if(args.input == undefined){
@@ -36,54 +34,44 @@ const aepGet = async (egID, args) =>{
     chunking.stop()
     console.log('Finished.')
     errorGroupResponse = undefined;
-
-    resultingChunks = [];
-    for(let i = 0; i< chunks.length; i++){
-        console.log(`Processing chunk ${i+1} of ${chunks.length}`)
-        resultingChunks.push(await processChunk(chunks[i].slice(0), egID, args));
-    }
-    chunks = undefined
-
-    console.log('Aggregating chunks...');
-    const aggregate = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-    aggregate.start(resultingChunks.length, 0);
+    
+    console.log('Processing chunks...')
+    const processing = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+    let chunkIndex = 0
     let result = []
-    for(let i = 0; i< resultingChunks.length; i++){
-        for(let j = 0; j< resultingChunks[i].length; j++){
-            result.push(resultingChunks[i][j]);
+    if(args.chunkfile){ 
+        try {
+            chunkIndex = parseInt(readFile(args.chunkfile))
+            result = JSON.parse(await readFileAsync(args.output))
+        } catch (error) {
+            writeFile('0', args.chunkfile);
         }
-        aggregate.update(i+1);
     }
-    aggregate.stop();
-    console.log('Finished.')
-
-    console.log(`Writing output to ${args.output}...`)
-    writeFile(JSON.stringify(errorGroupResponse), args.output)
-    console.log('Finished.')
+    processing.start(chunks.length, chunkIndex);
+    for(let i = chunkIndex; i< chunks.length; i++){
+        let currentChunk = await processChunk(chunks[i].slice(0), egID, args);
+        for(let j = 0; j< currentChunk.length; j++){
+            result.push(currentChunk[j]);
+            writeFile(JSON.stringify(result), args.output)
+            if(args.chunkfile){
+                writeFile(`${i}`, args.chunkfile);
+            }
+        }
+        processing.update(i+1);
+    }
+    processing.stop()
+    chunks = undefined
 }
 
 const processChunk = async (chunk, egID, args) =>{
     downloadIndex = 0;
-    console.log('Enumerating individual error responses...')
-    const enumerate = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-    enumerate.start(chunk.length, 0);
     let downloadTasks = []
     for(let i = 0; i < chunk.length; i++){
         downloadTasks.push(getErrorResponse(egID, chunk[i], args.key, args.owner, args.app))
-        enumerate.update(i+1)
     }
-    enumerate.stop()
-    console.log('Finished.')
 
-    console.log('Downloading individual error responses...')
-    progress.start(chunk.length, 0);
     let downloadResults = await Promise.allSettled(downloadTasks);
-    progress.stop();
-    console.log('Finished.')
 
-    console.log('Injecting individual error responses...')
-    const inject = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-    inject.start(chunk.length, 0);
     for(let i = 0; i < chunk.length; i++){
         let errorID = chunk[i].errorId;
         for(let j = 0; j < downloadResults.length; j++){
@@ -96,10 +84,8 @@ const processChunk = async (chunk, egID, args) =>{
                 }
             }
         }
-        inject.update(i+1)
     }
-    inject.stop()
-    console.log('Finished.')
+
     return chunk;
 }
 
@@ -108,8 +94,6 @@ const getErrorResponse = async (groupID, errorID, key, owner, app) => {
     if(errorResponse == undefined){
         return undefined;
     }
-    progress.update(downloadIndex+1);
-    downloadIndex ++;
     return {
         'errorId':errorResponse.errorId,
         'reasonFrames':errorResponse.reasonFrames,
