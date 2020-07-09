@@ -1,5 +1,5 @@
 const cliProgress = require('cli-progress');
-const {writeFile, readFileAsync, readFile} = require('./shared')
+const {writeFile, readFileAsync} = require('./shared')
 const { errorGroup, errorInstance } = require('./appcenterAPI')
 
 const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);

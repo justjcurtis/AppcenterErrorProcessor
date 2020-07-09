@@ -20,8 +20,13 @@ const writeFile = (data, path) => {
     fs.writeFileSync(path, data)
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
 module.exports = {
     writeFile,
     readFile,
-    readFileAsync
+    readFileAsync, 
+    sleep
 }

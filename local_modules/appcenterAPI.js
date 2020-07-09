@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const { sleep } = require('./shared')
 const url = "https://api.appcenter.ms/v0.1/apps";
 
 const errorGroup = async (groupID, apiKey, from, to, owner, app) => {
@@ -48,13 +49,12 @@ const appcenterRequest = async (path, key, attempt=0) => {
         const json = await response.json();
         return json;
     } catch (error) {
-        if(attempt < 3){
-            setTimeout(function(){ 
-                return await appcenterRequest(path, key, attempt + 1)
-            }, 3000); 
+        if(attempt < 10){
+            await sleep(3000)
+            return await appcenterRequest(path, key, attempt + 1)
         }
         else{
-            console.log(`Skipping ${url}${path} after 3 attempts...`)
+            console.log(`Skipping ${url}${path} after 10 attempts...`)
             return undefined
         }
     }
