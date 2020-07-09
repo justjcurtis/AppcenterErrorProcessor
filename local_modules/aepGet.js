@@ -25,9 +25,9 @@ const aepGet = async (egID, args) =>{
     const chunking = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
     chunking.start(errorGroupResponse.length, 0);
     let chunks = [[]]
-    let chunksize = 50000;
+    let chunksize = 10;
     for(let i = 0; i < errorGroupResponse.length; i++){
-        if((i+1)%chunksize == 0){
+        if(i%chunksize == 0){
             chunks.push([])
         }
         chunks[chunks.length-1].push(errorGroupResponse[i]);
@@ -95,7 +95,7 @@ const processChunk = async (chunk, egID, args) =>{
                 }
             }
         }
-        inject.update[i+1]
+        inject.update(i+1)
     }
     inject.stop()
     console.log('Finished.')
