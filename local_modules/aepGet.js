@@ -67,7 +67,7 @@ const processChunk = async (chunk, egID, args) =>{
     downloadIndex = 0;
     let downloadTasks = []
     for(let i = 0; i < chunk.length; i++){
-        downloadTasks.push(getErrorResponse(egID, chunk[i], args.key, args.owner, args.app))
+        downloadTasks.push(getErrorResponse(egID, chunk[i].errorId, args.key, args.owner, args.app))
     }
 
     let downloadResults = await Promise.allSettled(downloadTasks);
@@ -76,11 +76,11 @@ const processChunk = async (chunk, egID, args) =>{
         let errorID = chunk[i].errorId;
         for(let j = 0; j < downloadResults.length; j++){
             if(downloadResults[j]!= undefined){
-                if(downloadResults[j].errorId == errorID){
-                    chunk[i].reasonFrames = downloadResults[j].reasonFrames
-                    chunk[i].carrierName = downloadResults[j].carrierName
-                    chunk[i].jailbreak = downloadResults[j].jailbreak
-                    chunk[i].properties = downloadResults[j].properties
+                if(downloadResults[j].value.errorId == errorID){
+                    chunk[i].reasonFrames = downloadResults[j].value.reasonFrames
+                    chunk[i].carrierName = downloadResults[j].value.carrierName
+                    chunk[i].jailbreak = downloadResults[j].value.jailbreak
+                    chunk[i].properties = downloadResults[j].value.properties
                 }
             }
         }
