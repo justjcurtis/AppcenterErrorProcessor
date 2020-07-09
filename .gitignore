@@ -1,3 +1,4 @@
 *.lock
 .vscode/
 node_modules/
+debug.js
