@@ -24,7 +24,8 @@ const {
     aepGet,
     removeDupes,
     splitErrors,
-    joinErrors
+    joinErrors,
+    countErrors
 } = require('./index.js')
 
 cli
@@ -85,5 +86,12 @@ cli
     .requiredOption('-o, --output <output>', 'sets output file location')
     .action(function (path, args) {
         joinErrors(path, args)
+    })
+cli
+    .command('count <path>')
+    .alias('c')
+    .description('counts and displays the number of error entries in an error output file')
+    .action(function (path, args) {
+        countErrors(path, args)
     })
 cli.parse(process.argv)
