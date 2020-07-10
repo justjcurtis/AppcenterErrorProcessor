@@ -41,8 +41,7 @@ const aepGet = async (egID, args) =>{
     let result = []
     if(args.chunkfile){ 
         try {
-            chunkIndex = parseInt(readFile(args.chunkfile))
-            result = JSON.parse(await readFileAsync(args.output))
+            chunkIndex = parseInt(readFile(args.chunkfile)) + 1
         } catch (error) {
             writeFile('0', args.chunkfile);
         }
@@ -52,9 +51,12 @@ const aepGet = async (egID, args) =>{
         let currentChunk = await processChunk(chunks[i].slice(0), egID, args);
         for(let j = 0; j< currentChunk.length; j++){
             result.push(currentChunk[j]);
-            writeFile(JSON.stringify(result), args.output)
-            if(args.chunkfile){
-                writeFile(`${i}`, args.chunkfile);
+            if(result.length == chunksize*10 || i == chunks.length-1){
+                writeFile(JSON.stringify(result), `${args.output}.${i}`)
+                if(args.chunkfile){
+                    writeFile(`${i}`, args.chunkfile);
+                }
+                result = [];
             }
         }
         processing.update(i+1);

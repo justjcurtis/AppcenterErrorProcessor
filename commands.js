@@ -11,17 +11,20 @@ const date2str = (x, y) => {
         m: x.getMinutes(),
         s: x.getSeconds()
     };
-    y = y.replace(/(M+|d+|h+|m+|s+)/g, function(v) {
+    y = y.replace(/(M+|d+|h+|m+|s+)/g, function (v) {
         return ((v.length > 1 ? "0" : "") + eval('z.' + v.slice(-1))).slice(-2)
     });
 
-    return y.replace(/(y+)/g, function(v) {
+    return y.replace(/(y+)/g, function (v) {
         return x.getFullYear().toString().slice(-v.length)
     });
 }
 
 const {
     aepGet,
+    removeDupes,
+    splitErrors,
+    joinErrors
 } = require('./index.js')
 
 cli
@@ -40,23 +43,47 @@ cli
     .option('-f, --from <from>', 'sets from date "yyyy/mm/dd" - defaults to 90 days ago')
     .option('-t, --to <to>', 'sets to date "yyyy/mm/dd" - defaults to today')
     .action(function (ErrorGroupID, args) {
-        if(args.to == undefined){
+        if (args.to == undefined) {
             args.to = new Date();
-        }else{
+        } else {
             args.to = new Date(args.to);
         }
-        if(args.from == undefined){
-            var dateOffset = (24*60*60*1000) * 90; //30 days
+        if (args.from == undefined) {
+            var dateOffset = (24 * 60 * 60 * 1000) * 90; //30 days
             var fromDate = new Date();
             fromDate.setTime(fromDate.getTime() - dateOffset);
             args.from = fromDate;
-        }else{
+        } else {
             args.from = new Date(args.from)
         }
 
         args.to = date2str(args.to, 'yyyy%2FMM%2Fdd')
         args.from = date2str(args.from, 'yyyy%2FMM%2Fdd')
-        
+
         aepGet(ErrorGroupID, args)
+    })
+cli
+    .command('dedupe <path>')
+    .alias('d')
+    .description('remove duplicate entries based on entry.errorId for file provided')
+    .requiredOption('-o, --output <output>', 'sets output file location')
+    .action(function (path, args) {
+        removeDupes(path, args)
+    })
+cli
+    .command('split <path>')
+    .alias('s')
+    .description('split big file into 10xChunk files')
+    .requiredOption('-o, --outputdir <outputdir>', 'sets output file location')
+    .action(function (path, args) {
+        splitErrors(path, args)
+    })
+cli
+    .command('join <dir>')
+    .alias('j')
+    .description('join 10xChunk files into 1 large json blob')
+    .requiredOption('-o, --output <output>', 'sets output file location')
+    .action(function (path, args) {
+        joinErrors(path, args)
     })
 cli.parse(process.argv)

@@ -50,7 +50,7 @@ const appcenterRequest = async (path, key, attempt=0) => {
         return json;
     } catch (error) {
         if(attempt < 10){
-            await sleep(3000)
+            await sleep(1000)
             return await appcenterRequest(path, key, attempt + 1)
         }
         else{
